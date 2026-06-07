@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "A VideoPlatform",
+  "type": "module",
+  "keywords": [
+    "javascript",
+    "express",
+    "mnongoDB",
+    "moongose",
+    "node",
+    "backend"
+  ],
+  "homepage": "https://github.com/akshyyyt/VideoPlatform#readme",
+  "bugs": {
+    "url": "https://github.com/akshyyyt/VideoPlatform/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akshyyyt/VideoPlatform.git"
+  },
+  "license": "ISC",
+  "author": "Akshit",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
