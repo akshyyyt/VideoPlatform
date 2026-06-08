@@ -1,1 +1,1 @@
-export const DB_NAME =  "Vimo"w
+export const DB_NAME =  "Vimo"
