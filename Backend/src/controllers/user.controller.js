@@ -4,6 +4,28 @@ import { User } from '../models/user.model.js';
 import uploadOnCloudinary from '../utils/cloudinary.js';
 import ApiResponse from '../utils/apiResponse.js';
 
+const generateAccessAndRefreshToken = async function(userId){
+    try {
+        const user = await User.findById(userId);
+
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+
+        user.refreshToken = refreshToken;
+        user.accessToken = accessToken;
+
+        await user.save({validateBeforeSave: false}); // Since while saving it will want other fields too, so it bypass it validateBeforeSave 
+
+        return {
+            accessToken,
+            refreshToken
+        }
+    } catch (err) {
+        console.log(err)
+        throw new ApiError(500, 'Internal Server Error');
+    }
+}
+
 const registerUser = asyncHandler( async (req, res) => {
 
     // Get user details from frontend
@@ -66,4 +88,90 @@ const registerUser = asyncHandler( async (req, res) => {
     )
 })
 
-export default registerUser;
+const loginUser = asyncHandler( async(req, res) => {
+    // req body se data
+    const { email, username, password } = req.body;
+
+    // username or email, find username or email, check pass
+    if (!(email || username)){
+        throw new ApiError(404, 'Username or email is required');
+    }
+
+
+    const user = await User.findOne({
+        $or: [{email}, {username}]
+    });
+
+    if (!user){
+        throw ApiError(404, "Invalid Credentials");
+    }
+
+    // password check
+    const isPassValid = await user.isPasswordCorrect(password);
+
+    if (!isPassValid){
+        throw ApiError(404, "Invalid Credentials");
+    }
+
+    // access and refresh token
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
+
+    // also removing some field by making db call
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+    // send cookie
+    const options = {
+        httpOnly: true,
+        secure: true
+    } // by default user can modify it on frontend but now only can be modified by server
+
+    // response
+    return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(new ApiResponse(200, {
+                user: loggedInUser,
+                accessToken,
+                refreshToken
+                },
+                'User Logged In'
+            ))
+})
+
+const logOut = asyncHandler( async (req, res) => { 
+    await User.findByIdAndUpdate(req.user._id, 
+        {
+            $set: {
+            accessToken: undefined
+            }
+        },
+        {
+            returnDocument: "after" // Give the updated value in response
+        } 
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }  
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(
+        new ApiResponse(200, 'User Logged Out')
+    )
+}) 
+
+const refreshAccessToken = asyncHandler( async(req, res) => {
+
+})
+
+export {
+    registerUser,
+    loginUser,
+    logOut,
+    refreshAccessToken
+};
