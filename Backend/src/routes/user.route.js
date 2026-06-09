@@ -27,7 +27,7 @@ router.route('/logout').post(
     logOut
 );
 
-router.route('/refreshAccessToken').post(
+router.route('/refresh-token').post(
     refreshAccessToken
 )
 
