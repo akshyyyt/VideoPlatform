@@ -26,8 +26,8 @@ const registerUser = asyncHandler( async (req, res) => {
     };
 
     // Save images in local, check for avatar
-    const avatarLocalPath = req?.files.avatar[0].path; // We get the path of uploaded file.
-    const coverImageLocalPath = req?.files?.coverImage[0]?.path;
+    const avatarLocalPath = req?.files.avatar?.[0].path; // We get the path of uploaded file.
+    const coverImageLocalPath = req?.files?.coverImage?.[0]?.path;
 
     if (!avatarLocalPath){
         throw new ApiError(400, 'Avator not found!');
@@ -36,7 +36,7 @@ const registerUser = asyncHandler( async (req, res) => {
     // upload them on cloudinaary
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    const coverImage = coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath) : null;
 
     if (!avatar){
         throw new ApiError(500, 'Something went wrong while uploading the file')
