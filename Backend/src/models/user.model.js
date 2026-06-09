@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true,
     },
-    fullName: {
+    fullname: {
         type: String,
         required: true,
         trim: true,
@@ -48,11 +48,10 @@ const userSchema = new mongoose.Schema({
 }, {timestamps: true})
 
 // Just before saving used.
-userSchema.pre('save', async function (next) {
-    if (!this.isModified("password")) return next(); // Fixed the issue.
+userSchema.pre('save', async function () {
+    if (!this.isModified("password")) return; // Fixed the issue.
 
     this.password = await bcrypt.hash(this.password, 10); // What to crypt and how many rounds.
-    next();
 }) // But this will always run, even if we don't change the password.
 
 // We have tp check the pass
