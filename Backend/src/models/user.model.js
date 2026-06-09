@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function (next) {
     if (!this.isModified("password")) return next(); // Fixed the issue.
 
-    this.password = bcrypt.hash(this.password, 10); // What to crypt and how many rounds.
+    this.password = await bcrypt.hash(this.password, 10); // What to crypt and how many rounds.
     next();
 }) // But this will always run, even if we don't change the password.
 
