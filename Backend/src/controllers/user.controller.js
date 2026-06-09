@@ -1,13 +1,13 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/apiError.js';
 import { User } from '../models/user.model.js';
-import { uploadOnCloudinary } from '../utils/cloudinary.js';
+import uploadOnCloudinary from '../utils/cloudinary.js';
 import ApiResponse from '../utils/apiResponse.js';
 
 const registerUser = asyncHandler( async (req, res) => {
 
     // Get user details from frontend
-    const { fullname, email, username, password  } = req.body();
+    const { fullname, email, username, password  } = req.body;
 
     // Validation - not empty
     if (
@@ -17,7 +17,7 @@ const registerUser = asyncHandler( async (req, res) => {
     };
 
     // Check if already exist
-    const existedUser = User.find({
+    const existedUser = await User.find({
         $or: [ email, username ] // Checks multiple
     })
 
