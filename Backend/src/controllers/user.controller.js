@@ -202,6 +202,25 @@ const refreshAccessToken = asyncHandler( async(req, res) => {
 
 })
 
+const changeCurrentPass = asyncHandler( async(res, req) => {
+    const { oldPass, newPass } = req.body;
+
+    // If user is able to change passs, then he's logged in. Ie we have user by middle ware 
+    const user = await User.findById(req.user?._id);
+
+    const isPassCorrect = await user.isPasswordCorrect(oldPass)
+
+    if (!isPassCorrect){
+        throw new ApiError(400, 'Invalid Password');
+    };
+
+    user.password = newPass;
+    await user.save({validateBeforeSave: false}); 
+
+    return res.status(200)
+    .json(new ApiResponse(200, {}, 'Password Changed'))
+})
+
 export {
     registerUser,
     loginUser,
